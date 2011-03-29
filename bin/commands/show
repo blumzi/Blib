@@ -1,0 +1,145 @@
+#!/bin/bash
+
+source /etc/profile.d/blib.sh
+
+BLIB_OPTS=$( getopt -o '' --long "verbose,mono,top:,help,format:" -n "${prog}" -- "$@" )
+eval set -- "${BLIB_OPTS}"
+
+module_include error
+
+   mono=false
+verbose=false
+    top=${BLIB_BASE}/bin
+ format=text
+
+function usage() {
+    local path=${prog//\// }
+
+    cat <<- EOF
+	
+	Usage: ${BLIB_COMMAND} ${path} [--help}
+	       ${BLIB_COMMAND} ${path} [--format=<text|xml>] [--verbose] [--mono] [--top=<top>]
+	
+	  Description:
+	       Shows the ${BLIB_COMMAND} subcommand hierarchy
+	
+	  Flags:
+	       --format:  either text (default) or xml
+	       --verbose: show command flags
+	       --mono:    no colors
+	       --top:     show only from <top> down
+	
+	EOF
+}
+
+while true; do
+	case "${1}" in
+    --format)
+        if ! ( [ "${2}" = text ] || [ "${2}" = xml ] ); then
+            error_fatal "The format can be either \"text\" (default) or \"xml\"."
+        fi
+        format=${2}
+        shift 2
+        ;;
+
+    --help)
+        usage
+        exit 0
+        ;;
+
+	--verbose)
+        verbose=true
+        shift 1
+		;;
+
+    --mono)
+        mono=true
+        shift 1
+        ;;
+
+    --top)
+        top="${2}"
+        shift 2
+        ;;
+
+	--)
+		shift 1
+		break
+		;;
+	esac
+done
+
+module_include command str
+
+if ${mono}; then
+    dir_color=white
+    exe_color=white
+else
+    if [ "${LS_COLORS}" ]; then
+        dir_color=${LS_COLORS#*di=??;?}
+        dir_color=${dir_color%%:*}
+
+        exe_color=${LS_COLORS#*ex=??;?}
+        exe_color=${exe_color%%:*}
+
+        ln_color=${LS_COLORS#*ln=??;?}
+        ln_color=${exe_color%%:*}
+    else
+        dir_color=blue
+        exe_color=green
+	 ln_color=cyan
+    fi
+fi
+
+[ "${top}" ] && top="${BLIB_BIN}/${top}" || top=${BLIB_BIN}
+
+tree -Ff ${top} | sed 's;^;:;' | while read line; do
+    line="${line#:}"
+
+    if [ ! "${line}" ] || [ "${line}" = '.' ] || [ "${line}" = "${BLIB_BIN}" ] || [[ "${line}" == *directories,*file* ]]; then
+        continue
+    elif [ "${line}" = "${top}" ]; then
+        type=/
+    elif [[ "${line}" == *-\>* ]]; then
+        type="link"
+    else
+        type=${line:${#line}-1:${#line}}
+    fi
+    if [ "${line}" != "${top}" ]; then
+        line="${line:0:${#line}-1}"     # discard type
+    fi
+    arr=( ${line} )
+
+    if [ "${type}" = link ]; then
+        path=${arr[1]}
+    else
+        path=${arr[${#arr[*]}-1]}
+    fi
+
+    short_path="${path##*/}"
+
+    case "${type}" in
+    /)
+        line="${line//${path}/$(str_color ${dir_color} "${short_path}")}"
+        ;;
+
+    link)
+        line="${line//${path}/$(str_color ${ln_color} "${short_path}")}"
+	line="${line//${BLIB_BIN}/}"
+	;;
+	
+    \*)
+        line="${line//${path}/$(str_color ${exe_color} "${short_path}")}"
+        opts=''
+        if ${verbose}; then
+            opts+="$( command_getopts ${path} )"
+            if ${mono}; then
+                line+="${opts}"
+            else
+                line+="$(str_color yellow "${opts}")"
+            fi
+        fi
+        ;;
+    esac
+    echo "${line}"
+done

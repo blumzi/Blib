@@ -1,0 +1,65 @@
+#!/bin/bash
+
+source /etc/profile.d/blib.sh
+
+module_include error
+
+all=false
+ids=()
+
+function usage() {
+    local path=${prog//\// }
+
+    cat <<- EOF
+	
+	Usage: ${BLIB_COMMAND} ${path} [--help]
+	       ${BLIB_COMMAND} ${path} [--all]
+	       ${BLIB_COMMAND} ${path} [--id=<id>] ... [--id=<id>]
+	
+	  Description:
+	       Deletes objects.
+	
+	  Flags:
+	       --all:  deletes ALL the instances.
+	       --id:   deletes the instance(s) specified by <id>.
+	
+	EOF
+}
+
+BLIB_OPTS=$( getopt -o '' --long "help,all,id:" -n "${prog}" -- "$@" )
+eval set -- "${BLIB_OPTS}"
+
+while true; do
+	case "${1}" in
+    --all)
+        all=true
+        shift 1
+        ;;
+
+    --id)
+        # If the specified <id> is valid, add it to the list.
+        ids+=( ${2} )
+        shift 2
+        ;;
+
+    --help)
+        usage
+        exit 0
+        ;;
+
+	--)
+		shift 1
+		break
+		;;
+
+    *)
+        usage
+        error_fatal --status=1 "Bad argument \"${1}\", see usage above, aborting!"
+        ;;
+	esac
+done
+
+#
+# Do the actual deletion
+#
+exit 0

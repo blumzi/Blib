@@ -1,0 +1,16 @@
+#!/bin/bash
+
+source /etc/profile.d/blib.sh
+
+module_include str
+
+indent="   "
+colors="red green yellow blue magenta cyan white black"
+
+for color in ${colors}; do
+	echo ""
+	echo "$(str_color                             ${color} ${color})"
+	for attr in bold underline inverse; do
+		echo "${indent}$(str_color --${attr}             ${color} ${attr}-${color})"
+	done
+done

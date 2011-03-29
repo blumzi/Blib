@@ -1,0 +1,68 @@
+#!/bin/bash
+
+source /etc/profile.d/blib.sh
+module_include dmi error
+
+function usage() {
+    local path=${prog//\// }
+
+    cat <<- EOF
+	
+	Usage: ${BLIB_COMMAND} ${path} [--help}
+	       ${BLIB_COMMAND} ${path} [--file=<file>] [[--section=<section>] [[--item=<item>] [--index=<index>]]]
+	
+	  Description:
+	       A wrapper for dmidecode(8).
+	
+	  Flags:
+	       --file:    use <file> as input, instead of running dmidecode.
+	       --section: specify a section
+	       --item:    specify an <item> within a <section>
+	       --index:   specify an <index> of an <item> within a <section>
+	
+	EOF
+}
+
+BLIB_OPTS=$( getopt -o '' --long "help,section:,item:,file:,index:" -n "${prog}" -- "$@" ) || \
+        error_fatal "Invalid argument(s), aborting!"
+
+eval set -- "${BLIB_OPTS}"
+
+args=
+
+while true; do
+	case "${1}" in
+    --help)
+        usage
+        shift 1
+        exit 0
+        ;;
+
+	--section)
+        args+=" --compacted-section=$(str_compact "${2}")"
+        shift 2
+		;;
+
+	--item)
+        args+=" --compacted-item=$(str_compact "${2}")"
+		shift 2
+		;;
+
+    --file)
+        args+=" --file=${2}"
+		shift 2
+		;;
+	
+    --index)
+        args+=" --index=${2}"
+		shift 2
+		;;
+	
+	--)
+		shift 1
+		break
+		;;
+	esac
+done
+
+dmi_get ${args}

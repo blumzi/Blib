@@ -1,0 +1,34 @@
+#!/bin/bash
+
+source /etc/profile.d/blib.sh
+
+BLIB_OPTS=$( getopt -o '' --long "functions,paths,module:" -n "${prog}" -- "$@" )
+eval set -- "${BLIB_OPTS}"
+
+args=
+
+while true; do
+	case "${1}" in
+	--paths)
+        args+=" --paths"
+        shift 1
+		;;
+
+	--functions)
+        args+=" --functions"
+		shift 1
+		;;
+
+    --module)
+        args+=" --module=${2}"
+        shift 2
+        ;;
+
+	--)
+		shift 1
+		break
+		;;
+	esac
+done
+
+module_tree ${args}

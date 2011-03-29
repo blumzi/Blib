@@ -1,0 +1,193 @@
+#!/bin/bash
+
+prog=$(basename ${0})
+
+blibrc=''
+if [ "${BLIBRC}" ] && [ -r ${BLIBRC} ]; then
+    blibrc=${BLIBRC}
+elif [ -r /etc/profile.d/blib.sh ]; then
+    blibrc="/etc/profile.d/blib.sh"
+fi
+
+if [ "${blibrc}" ]; then
+    source ${blibrc}
+else
+    echo "${prog}: Cannot locate a BLIB startup file, aborting!"
+    exit 1
+fi
+
+export BLIBRC=${blibrc}
+
+if [ ! "${BLIB_PATH}" ]; then
+    echo "${prog}: Missing environment variable \"BLIB_PATH\", aborting!"
+    exit 1
+fi
+
+blib_path=( ${BLIB_PATH//:/ } )
+export PS4='+ ${BASH_SOURCE#${blib_path[0]}/}:${LINENO}:${FUNCNAME:-main}: '
+
+for dir in ${BLIB_PATH//:/ }; do
+    if [ -r ${dir}/lib/module.sh ]; then
+        source ${dir}/lib/module.sh
+        break
+    fi
+done
+
+if ! typeset -f module_include >/dev/null; then
+    echo "${prog}: No module_include, aborting!"
+    exit 1
+fi
+
+module_include error
+
+function usage_btool() {
+    cat <<- EOF
+
+    usage: ${prog} --help
+    usage: ${prog} <global-flags> [[sub] ... ] command [flags] [args]
+
+    <global-flags>:
+        --debug:    run the sub-command in debug mode
+
+    Runs the sub-command with flags and arguments.
+
+	EOF
+}
+
+function usage_bdoc() {
+    cat <<- EOF
+
+    usage: ${prog} --help
+    usage: ${prog} [[sub] ... ] command
+    usage: ${prog} [--module=<module-name> [--function=<function-name>]]
+
+	EOF
+}
+
+         argv=( "${@}" )
+         argc=${#argv[*]}
+        flags=()
+ command_path=()
+command_flags=()
+ command_args=()
+
+for (( i = 0; i < ${argc}; i++ )); do
+    [[ "${argv[i]}" != -* ]] && break || flags+=("${argv[i]}")
+done
+
+debug=false
+ help=false
+  sub=false
+
+BLIB_OPTS=$( getopt -o 'dhm:f:' --long "debug,help,module:,function:" -n "${prog}" -- "${flags[@]}" )
+eval set -- "${BLIB_OPTS}"
+unset BLIB_OPTS
+
+while true; do
+    case "${1}" in
+    -h|--help)
+	eval usage_${prog}
+	exit 0
+        ;;
+    
+    -d|--debug)
+        debug=true
+        shift 1
+        ;;
+
+    -m|--module)
+        module="${2}"
+        shift 2
+        ;;
+
+    -f|--function)
+        func="${2}"
+        shift 2
+        ;;
+
+    --)
+        shift
+        break
+        ;;
+    esac
+done
+
+if [ ${prog} = ${BLIB_BDOC} ]; then
+    if [ "${module}" ]; then
+        args="--module=${module}"
+
+        if [ "${func}" ]; then
+            args+=" --function=${func}"
+        fi
+
+        module_include doc
+        doc_module ${args}
+        exit 0
+    fi
+fi
+
+for ((; i < ${argc}; i++ )); do
+    [[ "${argv[i]}" == -* ]] && break || command_path+=("${argv[i]}")
+done
+
+if [ ${prog} = ${BLIB_BDOC} ]; then
+    module_include doc
+    doc_command ${command_path[*]}
+    exit 0
+fi
+
+for ((; i < ${argc}; i++ )); do
+    if [ "${argv[i]}" = "--" ]; then
+        (( i++ ))
+        break
+    elif [[ "${argv[i]}" != -* ]]; then
+        break
+    else
+        command_flags+=("${argv[i]}")
+    fi
+done
+
+for ((; i < ${argc}; i++ )); do
+    command_args+=("${argv[i]}")
+done
+
+for element in "${command_path[@]}"; do
+    BLIB_SUBCOMMAND_PATH+="${element}/"
+done
+BLIB_SUBCOMMAND_PATH="${BLIB_SUBCOMMAND_PATH%/}"
+
+export BLIB_SUBCOMMAND="${BLIB_SUBCOMMAND_PATH} ${command_flags[@]} ${command_args[@]}"
+export BLIB_COMMAND="${prog}"
+export BLIB_TOOL_INTERNAL="${BLIB_COMMAND}"
+export BLIB_PID=$$
+
+if [ ! "${BLIB_SUBCOMMAND_PATH}" ]; then
+    eval usage_${prog}
+    exit 1
+fi
+
+for dir in ${BLIB_PATH//:/ }; do
+    if [ -x ${dir}/bin/${BLIB_SUBCOMMAND_PATH} ]; then
+        executable=${dir}/bin/${BLIB_SUBCOMMAND_PATH}
+    fi
+done
+
+module_include trace
+trace_start ${BLIB_SUBCOMMAND//\// }
+
+[ "${executable}" ] || \
+    error_fatal --status=126 "Subcommand \"${BLIB_SUBCOMMAND_PATH//\// }\" not executable, aborting!"
+
+cmd="${executable}"
+if ${debug}; then
+    if [[ "$(file ${executable})" == *Bourne-Again\ shell\ script* ]]; then
+        cmd="env BASH_ENV=${BLIB_BASE}/etc/bash_env.sh ${cmd}"
+    else
+        cmd="${cmd} --debug"
+    fi
+fi
+
+${help} && cmd+=" --help"
+
+prog="${BLIB_SUBCOMMAND_PATH}" exec ${cmd} "${command_flags[@]}" "${command_args[@]}" || \
+    error_fatal --status=127 "Execution failed (status: $?) for \"${cmd} ${command_flags[@]} ${command_args[@]}\", aborting."

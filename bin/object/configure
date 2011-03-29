@@ -1,0 +1,101 @@
+#!/bin/bash
+
+source /etc/profile.d/blib.sh
+
+module_include error list
+
+ attrs=()
+values=()
+valid_attrs="attr1 attr2 attr3"
+old_id=''
+new_id=''
+
+function object_exists() {
+    : TBD
+}
+
+function usage() {
+    local path=${prog//\// }
+
+    cat <<- EOF
+	
+	Usage: ${BLIB_COMMAND} ${path} [--help]
+	       ${BLIB_COMMAND} ${path} --id=<id> --copy-of=<old-id> [--<attr>=<value>] ... [--<attr>=<value>]
+	       ${BLIB_COMMAND} ${path} --id=<id>                    [--<attr>=<value>] ... [--<attr>=<value>]
+	
+	  Description:
+	       Configures an object with <id>.
+	        - If it exists, the specified attributes are modified.
+	        - If it does not exist, it is created with the specified attributes (others from defaults).
+	
+	       Duplication:
+	        - First copy the existing object with <old-id> to a new object with <id>
+	        - Then change the specified attributes.
+	
+	  Flags:
+	       --id:      specify an object to act upon, by <id>.
+	       --copy-of: specify an existent object to be copied.
+	       --attr:    specify an attribute.
+	
+	EOF
+}
+
+BLIB_OPTS=$( getopt -o '' --long "help,id:,copy-of:" -n "${prog}" -- "$@" )
+eval set -- "${BLIB_OPTS}"
+
+while true; do
+	case "${1}" in
+    --copy-of)
+        # Check if id ${2} exists
+        if ! object_exists --id=${2}; then
+            error_fatal "No object with id=${2}, aborting!"
+        fi
+        old_id="${2}"
+        shift 2
+        ;;
+
+    --id)
+        if object_exists --id=${2}; then
+            error_fatal "Object with id=${2} already exists, aborting!"
+        fi
+        new_id="${2}"
+        shift 2
+        ;;
+
+    --help)
+        usage
+        exit 0
+        ;;
+
+	--)
+		shift 1
+		break
+		;;
+
+    --*)
+         attr="${1#--}"
+        value="${2}"
+        if ! list_member ${attr} "${valid_attrs}"; then
+            error_fatal "Invalid attribute \"${attr}\", aborting!"
+        fi
+
+        #
+        # Check the validity of the "${value}".
+        #
+         attrs+=( "${attr}"  )
+        values+=( "${value}" )
+        shift 2
+        ;;
+	esac
+done
+
+if [ "${old_id}" ] && [ "${id}" ]; then
+    : # copy old to new and then update attributes
+elif [ "${id}" ]; then
+    : # either change or create the object and then update attributes
+else
+    usage
+    error_fatal "Bad usage, see above, aborting!"
+fi
+
+exit 0

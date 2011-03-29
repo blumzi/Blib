@@ -1,0 +1,34 @@
+.TH BDOC 1 "February, 2011"
+.SH NAME
+bdoc \- show documentation of blib-based commands or modules
+.SH SYNOPSIS
+.nf
+bdoc [ --help ]
+bdoc [[sub] ...] command
+bdoc --module=<module-name> [--function=<function-name>]
+.fi
+.SH DESCRIPTION
+.BR Bdoc
+locates a btool(1) command or a blib(3) module along the ${BLIB_PATH} and extracts its doc-blocks.
+.PP
+If no function is specified, 
+.BR bdoc
+will show the doc-blocks for all the functions in the specified module.
+.SH EXAMPLES
+.PP
+.nf
+.ta 37n
+Show the documentation for the command "\f3btool nal update-customer-file\f1":
+.BR $\ bdoc\ nal\ update-customer-file
+.ta
+.fi
+.PP
+.nf
+.ta 37n
+Show the documentation for a specific function within a module:
+.BR $\ bdoc\ --module=nal/nalcfg\ --function=nalcfg_customer_get
+.SH SEE ALSO
+.PP 
+btool(1), bdoc-guidelines
+.SH AUTHORS
+Arie Blumenzweig <theblumz@gmail.com>

@@ -1,0 +1,86 @@
+.TH BTOOL 1 "February, 2011"
+.SH NAME
+btool \- run blib based programs
+.SH SYNOPSIS
+.nf
+btool [ --debug ] sub-dir ... sub-dir command [ command-flags ] [ command-args ]
+.fi
+.SH DESCRIPTION
+.BR Btool
+is the frontend for blib based commands.  It searches for the executable 
+.BR bin/sub-dir/.../subdir/command
+along the 
+.BR ${BLIB_PATH}
+and runs it with the supplied flags and arguments.
+.PP
+.BR Btool
+provides some services for the commands it runs.  
+.TP 2
+Autocompletion
+.BR Btool
+will auto-complete the available hierarchy of commands.  When a bash(1) executable
+is reached, its flags will also be auto-completed (see blib-guidelines).
+.TP 2
+Debugging
+When run with \f2--debug\f1,
+.BR btool
+will
+.BR export\ BASH_ENV=${BLIB_BASE}/etc/bash_env
+, so that all 
+the descendant bash(1) scripts will have common debugging settings.
+.PP
+.SH EXAMPLES
+.BR Btool
+facilitates an object-oriented approach to building managemet applications.  All that's needed
+is for each managed object to have a directory with some executable scripts that implement the management methods.
+.PP
+.nf
+.ta 37n
+Show the current commands hierarchy (including flags):
+.BR $\ btool\ command\ show\ --verbose
+.ta
+.fi
+.PP
+.nf
+.ta 37n
+Configure a network interface:
+.BR $\ btool\ platform\ network\ interface\ configure\ --dev=eth0\ --addr=10.0.0.1/8\ --label=mgmt
+.PP
+Manage users:
+.BR $\ btool\ platform\ user\ delete\ --name=guest
+.BR $\ btool\ platform\ user\ configure\ --name=guest\ --password=xxx\ --shell=/bin/bash
+.BR $\ btool\ platform\ user\ show\ --name=guest\ --format=xml
+.ta
+.fi
+
+.SH ENVIRONMENT VARIABLES
+.TP 2
+BLIB_BASE
+Set by the default installation to /usr/share/blib.
+.TP 2
+BLIB_PATH
+A series of colon separated directories.  Affects 
+\f3btool\f1's executable and module search path.
+.TP 2
+BASH_ENV
+Set to ${BLIB_BASE}/etc/bash_env when running with \f2--debug\f1. See bash(1).
+
+.SH DIAGNOSTICS
+.PP
+If all is well \f3btool\f1 exits with the sub-command's exit status.
+.PP
+It will exit with status \f3126\f1 if it cannot find the requested command, or \f3127\f1 if it cannot execute the requested command.
+.SH FILES
+.TP 2
+/etc/profile.d/blib.sh
+The blib startup file.  Non-interactive shell scripts should source it.  Initiates some variables and
+defines the auto-completion mechanism.
+.TP 2
+${BLIB_BASE}/etc/bash_env
+See debugging.
+.SH SEE ALSO
+.PP 
+blib(3), blib-guidelines,
+bdoc(1), bdoc(5)
+.SH AUTHORS
+Arie Blumenzweig <theblumz@gmail.com>

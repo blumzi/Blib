@@ -1,0 +1,74 @@
+.TH BLIB 1 "February, 2011"
+.SH NAME
+blib \- a bash(1) infrastructure 
+.SH DESCRIPTION
+The
+.BR blib
+infrastructure extends the regular bash(1) programing language.  It relies on
+the programmer following a few guidelines and provides the following benefits:
+.TP 2
+Library modules
+Functions and global variables can be easily bunched in modules (see blib-guidelines(5)).  The
+modules can then be included with 
+.BR module_include
+which will:
+.RS
+- Search the module in lib directories along the ${BLIB_PATH}.
+.RE
+.RS
+- Include it only once.
+.RE
+.RS
+- Run the module's init function, once.
+.RE
+.TP 2
+Debugging
+Blib(3) uses the BASH_ENV vaiable to standardize debugging of scripts.  See the 
+.BR --debug
+flag for btool(1).
+
+.TP 2
+Flags and arguments
+Blib(3) suggests a standard way of passing flags and arguments to functions and commands. It uses the builtin
+.BR getopt
+function.  A side benefit is intrinsic auto-completion of flags on the command line.
+
+.TP 2
+Self documentation
+See
+.BR bdoc(1)
+and bdoc-guidelines(5) for a self-documenting programming style.
+
+.TP 2
+Pre-defined modules
+Blib(3) comes bundled with some useful modules for handling lists, strings, tests and many more. Try:
+.IP
+.BR $\ btool\ module\ show\ --functions\ --paths
+
+.TP 2
+Easily extendable commands hierarchy
+Commands are searched in the bin directories along the ${BLIB_PATH}.  It is very easy to add new commands 
+or to see what's currently available. Try:
+.IP
+.BR $\ btool\ command\ show\ --verbose
+
+.SH ENVIRONMENT VARIABLES
+.TP 2
+BLIB_PATH
+A series of colon separated directories.  Affects 
+the executables and modules search path.
+
+.SH FILES
+.TP 2
+/etc/profile.d/blib.sh
+The blib startup file.  Non-interactive shell scripts should source it.  Initiates some variables and
+defines the auto-completion mechanism.
+.TP 2
+${BLIB_BASE}/etc/bash_env
+See debugging.
+.SH SEE ALSO
+.PP 
+btool(1), blib-guidelines(5),
+bdoc(1), bdoc-guidelines(5)
+.SH AUTHORS
+Arie Blumenzweig <theblumz@gmail.com>

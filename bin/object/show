@@ -1,0 +1,114 @@
+#!/bin/bash
+
+source /etc/profile.d/blib.sh
+
+module_include error str xml
+
+verbose=false
+ format=text
+
+function show_attrs() {
+    echo "attr1 attr2 attr3"
+}
+
+function show_object() {
+    local id="${1}"
+    local value
+
+    if [ ${format} = "text" ]; then
+        echo -e "\nobject id: ${id}"
+        for (( i = 0; i < 3; i++ )); do
+            str_print_var attr${i} value${i}
+        done
+    else
+        xml_element "object"                    \
+            -a $(xml_attribute id    "${id}")   \
+            -a $(xml_attribute attr1 "value1")  \
+            -a $(xml_attribute attr2 "value2")  \
+            -a $(xml_attribute attr3 "value3")  \
+            "$(xml_element "some"               \
+                "$(xml_element "thing"          \
+                    "$( xml_element "else"      \
+                        "blah blah blah" )"
+                  )"
+              )"
+    fi
+
+}
+
+function usage() {
+    local path=${prog//\// }
+
+    cat <<- EOF
+	
+	Usage: ${BLIB_COMMAND} ${path} [--help]
+	       ${BLIB_COMMAND} ${path} --attrs
+	       ${BLIB_COMMAND} ${path} [--format=<text|xml>] [[--id=<id>] ... [--id=<id>]]
+	
+	  Description:
+	       Shows either a specified (with --id=) or all the objects.
+	
+	  Flags:
+	       --format:  either text (default) or xml
+	       --attrs:   show the full list of attributes for this type of object.
+	       --id:      specify one or more objects to show (default: all)
+	
+	EOF
+}
+
+ids=()
+
+BLIB_OPTS=$( getopt -o '' --long "help,format:,id:,attrs" -n "${prog}" -- "$@" )
+eval set -- "${BLIB_OPTS}"
+
+while true; do
+	case "${1}" in
+    --attrs)
+        show_attrs
+        shift 1
+        exit 0
+        ;;
+
+    --format)
+        case ${2} in
+        text|xml)
+            format=${2}
+            ;;
+        *)
+            error_fatal "The format can be either \"text\" (default) or \"xml\"."
+            ;;
+        esac
+        shift 2
+        ;;
+
+    --id)
+        # check the validity of ${2}
+        ids+=( ${2} )
+        shift 2
+        ;;
+
+    --help)
+        usage
+        exit 0
+        ;;
+
+	--)
+		shift 1
+		break
+		;;
+	esac
+done
+
+if [ ! "${ids}" ]; then
+    ids=( id1 id2 id3 )
+fi
+
+{
+	echo "<objects>"
+	for id in ${ids[*]}; do
+	    show_object ${id}
+	done
+	echo "</objects>"
+} | xml_format
+
+exit 0
