@@ -12,9 +12,6 @@
 ##
 module_include misc error flock str tmp
 
-_xml_tool_="xmlstarlet"
-typeset -r _xml_tool_
-
 function xml_is_node() {
     local dbfile="${1}"
     local  xpath="${2}"
@@ -440,4 +437,8 @@ function xml_unesc() {
 ##
 function xml_version() {
     echo "<?xml version="1.0"?>"
+}
+
+function xml_init() {
+    _xml_tool_="xmlstarlet"
 }
