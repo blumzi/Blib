@@ -1,0 +1,7 @@
+Blib is a bash(1) framework providing:
+
+ - modules: lookup and inclusion.  A large variety provided by the distribution
+ - btool: a CLI-like, easily extensible, hieararhical tool
+ - autocompletion: for btool commands, including possible flags
+ - bdoc: a framework for parsing and rendering self-documentation
+ - much more ...
