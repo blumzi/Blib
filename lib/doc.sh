@@ -1,27 +1,11 @@
 module_include str
 
 ##
-## @func    _doc_indent
-## @arg     <level> The indentation level
-## @desc    Produces spaces according to the indentation level
-## @out     Spaces
+## @func    _doc_flag_pack
+## @desc    Packs the arguments tightly, using a non-printable
+## @desc     separator.  The whole string can then be passed
+## @desc     as a single argument to other functions.
 ##
-function _doc_indent() {
-    local -i level=${1}
-    local indent="   " i str
-
-    for (( i = 0; i < level; i++ )); do
-        str+="${indent}"
-    done
-    echo "${str}"
-}
-
-function _doc_flag_unpack() {
-    local str="${*}"
-
-    echo "${str//${_doc_flag_separator}/ }"
-}
-
 function _doc_flag_pack() {
     local str arg
 
@@ -31,193 +15,11 @@ function _doc_flag_pack() {
     echo "${str%${_doc_flag_separator}}"
 }
 
-function _doc_inline_arg_description() {
-    local arg_info="${1}"
-    local -a info
-    local arg_name arg_type arg_desc arg_val str
-    local ifs="${IFS}"
-
-    [ "${arg_info}" ] || return
-
-    IFS="${_doc_flag_separator}"
-    info=( ${arg_info} )
-    IFS="${ifs}"
-
-    arg_name="${info[0]}"
-    arg_type="${info[1]}"
-    arg_desc="${info[2]}"
-
-    str="${arg_name}"
-    str="$( str_color --underline white "${str}" )"
-
-    case ${arg_type} in
-    mandatory)
-        str="${_doc_mandatory_deco:0:1}${str}${_doc_mandatory_deco:1:1}"
-        ;;
-
-    optional)
-        str="${_doc_optional_deco:0:1}${str}${_doc_optional_deco:1:1}"
-        ;;
-    esac
-
-    echo "${str}"
-}
-
-function _doc_inline_flag_description() {
-    local arg_info="${1}"
-    local -a info
-    local arg_name arg_type arg_desc arg_val str
-    local ifs="${IFS}"
-
-    [ "${arg_info}" ] || return
-
-    IFS="${_doc_flag_separator}"
-    info=( ${arg_info} )
-    IFS="${ifs}"
-
-    arg_name="${info[0]}"
-    arg_type="${info[1]}"
-     arg_val="${info[2]}"
-    arg_desc="${info[3]}"
-
-    str="${arg_name}"
-    if [ "${arg_val}" ]; then
-        str+="=<${arg_val}>"
-    fi
-    str="$( str_color --underline white "${str}" )"
-
-    case ${arg_type} in
-    mandatory)
-        str="${_doc_mandatory_deco:0:1}--${str}${_doc_mandatory_deco:1:1}"
-        ;;
-
-    optional)
-        str="${_doc_optional_deco:0:1}--${str}${_doc_optional_deco:1:1}"
-        ;;
-    esac
-
-    echo "${str}"
-}
-
 ##
-## @func _doc_full_flag_description
-## @arg <context> Either function or tool
-## @arg <flag-info> 
-## @out The formatted flag description suitable
-## @out  either for a function or tool context
+## @func    _doc_parse_flag
+## @desc    Parses a @flag line in a doc-block
+## @out     The flag's name, type, value and description, packed.
 ##
-function _doc_full_flag_description() {
-    local   context="${1}"
-    local flag_info="${2}"
-    local -a info
-    local flag_name flag_type flag_desc flag_val str
-    local ifs="${IFS}"
-
-    [ "${flag_info}" ] || return
-
-    IFS="${_doc_flag_separator}"
-    info=( ${flag_info} )
-    IFS="${ifs}"
-
-    flag_name="${info[0]}"
-    flag_type="${info[1]}"
-     flag_val="${info[2]}"
-    flag_desc="${info[3]}"
-
-    case ${context} in
-    function)
-         str="$(_doc_indent 2)"
-        str+="$(str_color --bold white "flag") "
-        str+="--$(str_color --underline white "${flag_name}")"
-        if [ "${flag_val}" ]; then
-            str+="="
-            str+="$(str_color --bold white "${flag_val}")"
-        fi
-        str+=" "
-        if [ ${flag_type} = optional ]; then
-            str+=" [opt] "
-        fi
-        str+="${flag_desc}"
-        str+="\n"
-        ;;
-
-    tool)
-         str="$(_doc_indent 1)"
-        str+="--$(str_color --underline white "${flag_name}")"
-        if [ "${flag_val}" ]; then
-            str+="="
-            str+="$(str_color --bold white "${flag_val}")"
-        fi
-        str+=" "
-        if [ ${flag_type} = optional ]; then
-            str+=" [opt] "
-        fi
-        str+="${flag_desc}"
-        str+="\n"
-        ;;
-    esac
-
-    echo "${str}"
-}
-
-##
-## @func _doc_full_arg_description
-## @arg <context> Either function or tool
-## @arg <arg-info> 
-## @out The formatted argument description suitable
-## @out  either for a function or tool context
-##
-function _doc_full_arg_description() {
-    local  context="${1}"
-    local arg_info="${2}"
-    local -a info
-    local arg_name arg_type arg_desc arg_val str
-    local ifs="${IFS}"
-
-    [ "${arg_info}" ] || return
-
-    IFS="${_doc_flag_separator}"
-    info=( ${arg_info} )
-    IFS="${ifs}"
-
-    arg_name="${info[0]}"
-    arg_type="${info[1]}"
-    arg_desc="${info[2]}"
-
-    case ${context} in
-    function)
-         str="$(_doc_indent 2)"
-        str+="$(str_color --bold white "arg")  "
-        str+="$(str_color --underline white "${arg_name}")"
-        str+="   "
-        if [ ${arg_type} = optional ]; then
-            str+=" [opt] "
-        fi
-        str+="${arg_desc}"
-        str+="\n"
-        ;;
-
-    tool)
-         str="$(_doc_indent 1)"
-        str+="$(str_color --underline white "${arg_name}")"
-        str+="   "
-        if [ ${arg_type} = optional ]; then
-            str+=" [opt] "
-        fi
-        str+="${arg_desc}"
-        str+="\n"
-        ;;
-    esac
-
-    echo "${str}"
-}
-
-function _doc_section() {
-    local section="${1}"
-
-    echo "\n$(str_color --bold white "$(str_toupper "${section}")")\n"
-}
-
 function _doc_parse_flag() {
     local input="${1}"
 
@@ -246,6 +48,11 @@ function _doc_parse_flag() {
     _doc_flag_pack "${flag_name}" "${flag_type}" "${flag_value}" "$(str_escape "${flag_desc}")"
 }
 
+##
+## @func    _doc_parse_arg
+## @desc    Parses a @arg line in a doc-block
+## @out     The arg's name, type, value and description, packed.
+##
 function _doc_parse_arg() {
     local input="${1}"
 
@@ -274,18 +81,37 @@ function _doc_parse_arg() {
 
 ##
 ## @func doc_command
-## @desc Formats a command's doc-block for display
+## @desc Parses and formats a command's doc-block for display
 ## @arg <command>
 ## @out The formatted doc-block
 ##
 function doc_command() {
-    local command="${@}"
+    local format=text
+    local opts=$( getopt -o '' --long "format:" -n "${FUNCNAME}" -- "$@" )
+    local command
+
+    eval set -- "${opts}"
+    while true; do
+        case "${1}" in
+        --format)
+            format="${2}"
+            shift 2
+            ;;
+
+        --)
+            shift 1
+            break
+            ;;
+        esac
+    done
+
+    command="${@}"
 
     module_include command
     local file=$( command_path_lookup "${@}" )
     local in_header=false line tag value
     local -a args flags exits descs authors see_alsos outputs 
-    local arg flag desc author see_also output 
+    local arg flag see_also output 
     local doc tmp
 
     if [ ! "${file}" ]; then
@@ -304,8 +130,8 @@ function doc_command() {
                 descs+=( "$(str_escape "${value}")" )
                 ;;
 
-            authors)
-                authors+=( "$(str_escape "${value}")" )
+            author)
+                authors+=( "$(str_escape "$(str_trim "${value}")" )" )
                 ;;
 
             arg|argument)
@@ -334,76 +160,25 @@ function doc_command() {
                 ;;
             esac
         elif ${in_header}; then
-            break
+            if [[ "${line}" == ${_doc_leader__}* ]]; then
+                continue
+            else
+                break
+            fi
         fi
     done < ${file}
 
-    doc=''
-    # section: command
-    doc+="$(_doc_section command)"
-    doc+="$(_doc_indent 1)${BLIB_COMMAND} ${command}"
-    doc+="\n"
+    module_include doc/doc${format}
 
-    # section: file
-    doc+="$(_doc_section file)"
-    doc+="$(_doc_indent 1)${file}"
-    doc+="\n"
-
-    # section: author
-    if [ "${authors}" ]; then
-        doc+="$(_doc_section author)"
-        doc+="$(_doc_indent 1)${authors[@]}"
-        doc+="\n"
-    fi
-
-    # section: description
-    if [ "${descs}" ]; then
-        doc+="$(_doc_section description)"
-        for desc in "${descs[@]}"; do
-            doc+="$(_doc_indent 1)${desc}\n"
-        done
-        doc+="\n"
-    fi
-
-    # section: flags
-    if [ "${flags}" ]; then
-        doc+="$(_doc_section flags)"
-        for flag in "${flags[@]}"; do
-            doc+="$(_doc_full_flag_description tool "${flag}")\n"
-        done
-        doc+="\n"
-    fi
-
-    # section: args
-    if [ "${args}" ]; then
-        doc+="$(_doc_section args)"
-        for arg in "${args[@]}"; do
-            doc+="$(_doc_full_arg_description tool "${arg}")\n"
-        done
-        doc+="\n"
-    fi
-
-    # section: output
-    if [ "${outputs}" ]; then
-        doc+="$(_doc_section output)"
-        for output in ${outputs[@]}; do
-            doc+="$(_doc_indent 1)${output}\n"
-        done
-        doc+="\n"
-    fi
-
-    # section: exits
-    if [ "${outputs}" ]; then
-        doc+="$(_doc_section "exit codes")"
-        for e in ${exits[@]}; do
-            set ${e/:/ }
-            exit_code=${1}
-            shift
-            exit_reason="${*}"
-            doc+="$(printf "%s%4s - %s" "$(_doc_indent 1)" "${exit_code}" "${exit_reason}")\n"
-        done
-        doc+="\n"
-    fi
+     doc=''
+    doc+="$( eval ${doc_render_command}     "${command}"    )"
+    doc+="$( eval ${doc_render_file}        "${file}"       )"
+    doc+="$( eval ${doc_render_authors}     "${authors[@]}" )"
+    doc+="$( eval ${doc_render_description} "${descs[@]}"   )"
+    doc+="$( eval ${doc_render_flags}       "${flags[@]}"   )"
+    doc+="$( eval ${doc_render_args}        "${args[@]}"    )"
+    doc+="$( eval ${doc_render_outputs}     "${outputs[@]}" )"
+    doc+="$( eval ${doc_render_exits}       "${exits[@]}"   )"
 
     doc="$(str_unescape "${doc}")"
     [ "${PAGER}" ] && \
@@ -413,7 +188,7 @@ function doc_command() {
 
 ##
 ## @func doc_module
-## @desc Formats a module's doc-block for display
+## @desc Parses and formats a module's doc-block for display
 ## @flag <module=name> The module's name
 ## @flag [function=name] Ask for just one function
 ## @out The formatted doc-block
@@ -423,11 +198,17 @@ function doc_module() {
     local functions func
     local doc str ptr tag value line
     local in_module=false in_func=false need_separator
-    local opts=$( getopt -o '' --long "module:,function:" -n "${FUNCNAME}" -- "$@" )
+    local format=text
+    local opts=$( getopt -o '' --long "format:,module:,function:" -n "${FUNCNAME}" -- "$@" )
 
     eval set -- "${opts}"
     while true; do
         case "${1}" in
+        --format)
+            format="${2}"
+            shift 2
+            ;;
+
         --module)
             the_module="${2}"
             shift 2
@@ -525,122 +306,46 @@ function doc_module() {
 
     done < ${module_file}
 
+    module_include doc/doctext
+
     # show the module info
     for attr in name file version author summary description; do
         eval "ptr=module_${attr}"
         if [ "${!ptr}" ]; then
-            if [ "${attr}" = "name" ]; then
-                doc+="$(_doc_section "module name")"
-            else
-                doc+="$(_doc_section "${attr}")"
-            fi
-            if [ "${ptr}" = "module_description" ]; then
-                str="${!ptr}"
-                while [ "${str}" ]; do
-                    doc+="$(_doc_indent 1)${str%%\\n*}\n"
-                    str="${str#*\\n}"
-                done
-            else
-                doc+="$(_doc_indent 1)${!ptr}\n"
-            fi
+            doc+="$( ${doc_render_module_section} "${attr}" "${!ptr}" )"
         fi
     done
 
     # show the functions info
     if [ "${functions}" ]; then
-        doc+="\n$(_doc_section functions)"
+        doc+="$( ${doc_render_module_section} "functions" "" )"
+
         for func in ${functions}; do
+            local function_name function_flags function_args function_desc
+
             if [ "${the_function}" ] && [ ${the_function} != ${func} ]; then
                 continue
             fi
 
-            # Show the function name
-            doc+="\n$(_doc_indent 1)$(str_color --bold white "${func}")"
+                   function_name=func
+                  function_flags=func_${func}_flags'[*]'
+                   function_args=func_${func}_args'[*]'
+                 function_stdout=func_${func}_stdout
+                function_returns=func_${func}_returns
+                function_summary=func_${func}_summary
+            function_description=func_${func}_description
 
-            # Show the (optional) flags
-            ptr=func_${func}_flags'[*]'
-            if [ "${!ptr}" ]; then
-                local _flags="${!ptr}"
-                local _flag
-
-                for _flag in ${_flags}; do
-                    doc+=" $( _doc_inline_flag_description "${_flag}" )"
-                done
-            fi
-
-            # Show the (optional) arguments
-            ptr=func_${func}_args'[*]'
-            if [ "${!ptr}" ]; then
-                local _args="${!ptr}"
-                local _arg
-
-                for _arg in ${_args}; do
-                    doc+=" $( _doc_inline_arg_description "${_arg}" )"
-                done
-            fi
-            doc+='\n'
-
-            need_separator=false
-            # Describe the flags
-            ptr=func_${func}_flags'[*]'
-            if [ "${!ptr}" ]; then
-                local _flags="${!ptr}"
-                local _flag
-
-                for _flag in ${_flags}; do
-                    doc+="$( _doc_full_flag_description function "${_flag}" )"
-                done
-                need_separator=true
-            fi
-
-            # Describe the arguments
-            ptr=func_${func}_args'[*]'
-            if [ "${!ptr}" ]; then
-                local _args="${!ptr}"
-                local _arg
-
-                for _arg in ${_args}; do
-                    doc+="$( _doc_full_arg_description function "${_arg}" )"
-                done
-                need_separator=true
-            fi
-
-            # Show the (optional) output to stdout
-            ptr="func_${func}_stdout"
-            if [ "${!ptr}" ]; then
-                doc+="$(_doc_indent 2)$(str_color --bold white out)  "${!ptr}"\n"
-                need_separator=true
-            fi
-
-            # Show the (optional) return value
-            ptr=func_${func}_returns
-            if [ "${!ptr}" ]; then
-                doc+="$(_doc_indent 2)$(str_color --bold white ret)  "${!ptr}"\n"
-                need_separator=true
-            fi
-
-            # Show the (optional) summary
-            ptr="func_${func}_summary"
-            if [ "${!ptr}" ]; then
-                doc+="$(_doc_indent 2)${!ptr}\n"
-                need_separator=true
-            fi
-
-            # Show the (optional) description
-            ptr="func_${func}_description"
-            if [ "${!ptr}" ]; then
-                if ${need_separator}; then
-                    doc+="\n"
-                fi
-                str="${!ptr}"
-                while [ "${str}" ]; do
-                    doc+="$(_doc_indent 2)${str%%\\n*}\n"
-                    str="${str#*\\n}"
-                done
-            fi
+            doc+="$( ${doc_render_module_function} \
+                        "${!function_name}" \
+                        "${!function_flags}" \
+                        "${!function_args}" \
+                        "${!function_stdout}" \
+                        "${!function_returns}" \
+                        "${!function_summary}" \
+                        "${!function_description}" \
+                    )"
         done
     fi
-    doc+="\n"
 
     doc="$(str_unescape "${doc}")"
     [ "${PAGER}" ] && \
