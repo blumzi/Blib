@@ -65,13 +65,24 @@ function doctext_format_authors() {
 
 function doctext_format_description() {
     local -a descs="${@}"
-    local str desc
+    local str desc spaces min=1000 line
 
     [ "${descs}" ] || return
 
     str="$(_doctext_section description)"
     for desc in ${descs[@]}; do
-        str+="$(_doctext_indent 1)${desc}\n"
+        if [ "${desc}" = "${const_escaped_newline}" ]; then
+            continue
+        fi
+        spaces="${desc%%[^${const_escaped_space}]*}"
+        if [ ${#spaces} -lt ${min} ]; then
+            min=${#spaces}
+        fi
+    done
+
+    for desc in ${descs[@]}; do
+        line="$(_doctext_indent 1)${desc}\n"
+        str+="${line:${min}}"
     done
 
     echo "${str}"

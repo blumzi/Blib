@@ -127,6 +127,9 @@ function doc_command() {
 
             case ${tag} in
             desc|description)
+                if [ ! "${value}" ]; then
+                    value="${const_escaped_newline}"
+                fi
                 descs+=( "$(str_escape "${value}")" )
                 ;;
 
