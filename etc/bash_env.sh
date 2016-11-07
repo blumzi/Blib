@@ -1,11 +1,23 @@
 #!/bin/bash
 
 #
-# This is a debug helper file. When the environment variable BASH_ENV 
-#  points to this file, each and every bash script will run
-#  it as soon as it starts, see man bash(1).
+# When the environment variable BASH_ENV points to this file, each and every
+#  bash script will run it as soon as it starts, see man bash(1).
 #
-export BASH_ENV=${BLIB_BASE}/etc/bash_env
-export PS4='+ \d \t ${FUNCNAME:-main}@${BASH_SOURCE}:${LINENO} '
-echo -e "\n ${0} ${@}\n"
-set -x
+
+BASH_ENV=
+if [ -r /etc/bash_env ]; then
+    BASH_ENV=/etc/bash_env
+elif [ -r ~/.blib/bash_env ]; then
+    BASH_ENV=~/.blib/bash_env
+fi
+
+if [ "${BASH_ENV}" ]; then
+    export BASH_ENV
+    source ${BASH_ENV}
+fi
+
+if [ "${BLIB_DEBUG}" ]; then
+    export PS4='+ \d \t ${FUNCNAME:-main}@${BASH_SOURCE}:${LINENO} '
+    set -x
+fi
