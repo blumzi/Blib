@@ -10,7 +10,14 @@ Requires:		bash
 BuildArch:		noarch
 
 %description
-A development framework for bash(1).
+
+A development framework for bash(1), providing:
+ - definition, lookup and inclusion of modules
+ - a structured tree for sub-commands
+ - debugging and tracing
+ - well defined argument passing
+ - definition of in-source documentation with man page generation
+
 
 %prep
 %setup -q
