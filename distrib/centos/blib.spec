@@ -3,7 +3,7 @@ Version:        1.0
 Release:        1%{?dist}
 Summary:        A bash development framework
 
-License:        BSD
+License:        BSD2
 Source0:        %{name}-%{version}.tgz
 
 Requires:		bash   
@@ -20,8 +20,9 @@ A development framework for bash(1).
 
 %install
 rm -rf $RPM_BUILD_ROOT
+cd usr/share/blib
 %make_install
-cd ${RPM_BUILD_ROOT}; find . -type f | sed -e "s;^.;;" -e 's;/usr/.*;&.gz;' > /tmp/%{name}-%{version}.files
+cd ${RPM_BUILD_ROOT}; find . -type f | sed -e "s;^.;;" -e 's;/usr/share/man/.*;&.gz;' > /tmp/%{name}-%{version}.files
 
 %files -f /tmp/%{name}-%{version}.files
 
