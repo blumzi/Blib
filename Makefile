@@ -1,32 +1,27 @@
-all:
-
 RPMBUILD = $(HOME)/rpmbuild
-PACKAGE = blib
-VERSION = 1.0
-DISTRO=$(shell \
-	if [ -r /etc/centos-release ]; then \
-		echo centos; \
-	elif [ -r /etc/redhat-release ]; then \
-		echo redhat;\
-	fi)
-DESTDIR = $(HOME)/tmp/${PACKAGE}-${VERSION}
+export PACKAGE = blib
+export VERSION = 1.0
 SUBDIRS = etc bin lib usr
 
-install:
-	$(MAKE) -C etc DESTDIR=$(DESTDIR) install
-	$(MAKE) -C bin DESTDIR=$(DESTDIR) install
-	$(MAKE) -C lib DESTDIR=$(DESTDIR) install
-	$(MAKE) -C usr DESTDIR=$(DESTDIR) install
+include distrib/macros.mk
+-include distrib/${DISTRO}/macros.mk
+
+distro:
+	@if [ ! "${DISTRO}" ]; then echo Cannot detect the DISTRO >&2; exit 1; fi
+
+install: distro
+	$(foreach dir,${SUBDIRS},${MAKE} -C ${dir} install;)
 	
-tarball: TMP = ${HOME}/tmp/${PACKAGE}-${VERSION}
-tarball: 
-	$(foreach dir,${SUBDIRS},${MAKE} -C ${dir} DESTDIR=${TMP} install;)
-	$(foreach dir,${SUBDIRS},install -D ${dir}/Makefile ${TMP}/${dir}/Makefile;)
-	install -m 644 -D Makefile ${DESTDIR}/Makefile
+tarball: export DESTDIR=${HOME}/tmp/${PACKAGE}-${VERSION}
+tarball: install
+	$(foreach dir,. ${SUBDIRS},install -D ${dir}/Makefile ${DESTDIR}/${BLIB_BASE}/${dir}/Makefile;)
 	install -m 644 -D distrib/${DISTRO}/${PACKAGE}.spec ${RPMBUILD}/SPECS/${PACKAGE}.spec
-	cd ${TMP}/..; tar czf $(HOME)/rpmbuild/SOURCES/${PACKAGE}-${VERSION}.tgz ${PACKAGE}-${VERSION}
+	install -m 644 -D distrib/macros.mk ${DESTDIR}/${BLIB_BASE}/distrib/macros.mk
+	install -D distrib/${DISTRO}/macros.mk ${DESTDIR}/${BLIB_BASE}/distrib/${DISTRO}/macros.mk
+	cd ${DESTDIR}; sed -i -e "s;@BLIB_BASE@;${BLIB_BASE};g" $$(find -type f)
+	cd ${DESTDIR}/..; tar czf $(HOME)/rpmbuild/SOURCES/${PACKAGE}-${VERSION}.tgz ${PACKAGE}-${VERSION}
 	
 distrib: tarball
 	cd ${RPMBUILD}/SPECS; rpmbuild -ba ${PACKAGE}.spec
 	
-.PHONY: distrib install
+PHONY: distrib install tarball all

@@ -30,7 +30,7 @@ if ! typeset -F __module_marker__ > /dev/null; then
         local dir modfile
 
         for dir in ${BLIB_PATH//:/ }; do
-            modfile=$(find ${dir}/lib -name ${module}.sh)
+            modfile=$(find ${dir} -name ${module}.sh)
             if [ "${modfile}" ] && [ -r ${modfile} ]; then
                 modfile=${modfile#${dir}/lib/}
                 modfile=${modfile%.sh}
@@ -179,8 +179,8 @@ if ! typeset -F __module_marker__ > /dev/null; then
         fi
 
         for dir in ${BLIB_PATH//:/ }; do
-            for file in $( find ${dir}/lib -name '*.sh'); do
-                module=${file#${dir}/lib/}
+            for file in $( find ${dir} -name '*.sh'); do
+                module=${file#${dir}/}
                 module=${module%.sh}
                 if list_member "${module}" "${seen}"; then
                     continue

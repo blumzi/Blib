@@ -100,5 +100,10 @@ function trace_previous() {
 }
 
 function trace_init() {
-    _trace_file=/var/log/blib-trace.xml
+	if [ -w /var/log/blib-trace.xml ]; then
+		_trace_file=/var/log/blib-trace.xml
+	else
+		mkdir -p ${HOME}/.blib
+		_trace_file=${HOME}/.blib/trace.xml
+	fi
 }

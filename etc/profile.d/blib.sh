@@ -1,18 +1,16 @@
 #!/bin/bash
 
-BLIB_BASE=/usr/share/blib
-
 if [ ! "${BLIB_PATH}" ]; then
-    export BLIB_PATH=${BLIB_BASE}
+    export BLIB_PATH=@BLIB_BASE@
 fi
 
-export     BLIB_ETC=${BLIB_BASE}/etc
 export BLIB_COMMAND="btool"
 export    BLIB_BDOC="bdoc"
 
 for dir in ${BLIB_PATH//:/ }; do
-    if [ -r ${dir}/lib/module.sh ]; then
-        source ${dir}/lib/module.sh
+    modfile=${dir}/lib/module.sh
+    if [ -r ${modfile} ]; then
+        source ${modfile}
         if typeset -F module_include >/dev/null; then
             break
         fi
@@ -25,13 +23,12 @@ fi
 unset dir
 
 for dir in ${BLIB_PATH//:/ }; do
-    if [ -d ${dir}/bin ] && [[ :${PATH}: != *:${dir}:* ]]; then
-        export PATH=${PATH}:${dir}/bin
-    fi
+  if [[ :${PATH}: != *:${dir}/bin:* ]]; then
+      export PATH=${PATH}:${dir}/bin
+  fi
 done
-unset dir
 
-export PS4='+ \D{%Y %h %d %T} \H ${FUNCNAME:-main}@${BASH_SOURCE#${BLIB_BASE}/}:${LINENO} '
+export PS4='+ \D{%Y %h %d %T} \H ${FUNCNAME:-main}@${BASH_SOURCE#${BLIB_LIB}/}:${LINENO} '
 
 module_include command
 

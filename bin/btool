@@ -48,6 +48,7 @@ function usage_btool() {
 
     <global-flags>:
         --debug:    run the sub-command in debug mode
+        --man:      show man page for the command or module (with --module=module [--function=function ])
 
     Runs the sub-command with flags and arguments.
 
@@ -78,20 +79,22 @@ done
 debug=false
  help=false
   sub=false
+  man=false
 
-BLIB_OPTS=$( getopt -o 'dhm:f:' --long "debug,help,module:,function:" -n "${prog}" -- "${flags[@]}" )
+BLIB_OPTS=$( getopt -o 'dhm:f:' --long "man,debug,help,module:,function:" -n "${prog}" -- "${flags[@]}" )
 eval set -- "${BLIB_OPTS}"
 unset BLIB_OPTS
 
 while true; do
     case "${1}" in
     -h|--help)
-	eval usage_${prog}
-	exit 0
+        eval usage_${prog}
+        exit 0
         ;;
     
     -d|--debug)
         debug=true
+        export BLIB_DEBUG=true
         shift 1
         ;;
 
@@ -104,6 +107,11 @@ while true; do
         func="${2}"
         shift 2
         ;;
+    
+    --man)
+        man=true
+        shift 1
+        ;;
 
     --)
         shift
@@ -112,7 +120,8 @@ while true; do
     esac
 done
 
-if [ ${prog} = ${BLIB_BDOC} ]; then
+if ${man}; then
+    module_include doc
     if [ "${module}" ]; then
         args="--module=${module}"
 
@@ -120,21 +129,16 @@ if [ ${prog} = ${BLIB_BDOC} ]; then
             args+=" --function=${func}"
         fi
 
-        module_include doc
         doc_module ${args}
-        exit 0
+    else
+        doc_command ${argv[@]}
     fi
+    exit 0
 fi
 
 for ((; i < ${argc}; i++ )); do
     [[ "${argv[i]}" == -* ]] && break || command_path+=("${argv[i]}")
 done
-
-if [ ${prog} = ${BLIB_BDOC} ]; then
-    module_include doc
-    doc_command ${command_path[*]}
-    exit 0
-fi
 
 for ((; i < ${argc}; i++ )); do
     if [ "${argv[i]}" = "--" ]; then

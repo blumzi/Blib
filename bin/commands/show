@@ -9,7 +9,7 @@ module_include error
 
    mono=false
 verbose=false
-    top=${BLIB_BASE}/bin
+   tops=( $( for i in ${BLIB_PATH//:/ }; do echo ${i}/bin; done) )
  format=text
 
 function usage() {
@@ -17,7 +17,7 @@ function usage() {
 
     cat <<- EOF
 	
-	Usage: ${BLIB_COMMAND} ${path} [--help}
+	Usage: ${BLIB_COMMAND} ${path} [--help]
 	       ${BLIB_COMMAND} ${path} [--format=<text|xml>] [--verbose] [--mono] [--top=<top>]
 	
 	  Description:
@@ -58,7 +58,7 @@ while true; do
         ;;
 
     --top)
-        top="${2}"
+        tops+=( "${2}" )
         shift 2
         ;;
 
@@ -91,55 +91,55 @@ else
     fi
 fi
 
-[ "${top}" ] && top="${BLIB_BIN}/${top}" || top=${BLIB_BIN}
+for top in ${tops[@]}; do
+		tree -Ff ${top} | sed 's;^;:;' | while read line; do
+			line="${line#:}"
 
-tree -Ff ${top} | sed 's;^;:;' | while read line; do
-    line="${line#:}"
+			if [ ! "${line}" ] || [ "${line}" = '.' ] || [ "${line}" = "${BLIB_BIN}" ] || [[ "${line}" == *directories,*file* ]]; then
+				continue
+			elif [ "${line}" = "${top}" ]; then
+				type=/
+			elif [[ "${line}" == *-\>* ]]; then
+				type="link"
+			else
+				type=${line:${#line}-1:${#line}}
+			fi
+			if [ "${line}" != "${top}" ]; then
+				line="${line:0:${#line}-1}"     # discard type
+			fi
+			arr=( ${line} )
 
-    if [ ! "${line}" ] || [ "${line}" = '.' ] || [ "${line}" = "${BLIB_BIN}" ] || [[ "${line}" == *directories,*file* ]]; then
-        continue
-    elif [ "${line}" = "${top}" ]; then
-        type=/
-    elif [[ "${line}" == *-\>* ]]; then
-        type="link"
-    else
-        type=${line:${#line}-1:${#line}}
-    fi
-    if [ "${line}" != "${top}" ]; then
-        line="${line:0:${#line}-1}"     # discard type
-    fi
-    arr=( ${line} )
+			if [ "${type}" = link ]; then
+				path=${arr[1]}
+			else
+				path=${arr[${#arr[*]}-1]}
+			fi
 
-    if [ "${type}" = link ]; then
-        path=${arr[1]}
-    else
-        path=${arr[${#arr[*]}-1]}
-    fi
+			short_path="${path##*/}"
 
-    short_path="${path##*/}"
+			case "${type}" in
+			/)
+				line="${line//${path}/$(str_color ${dir_color} "${short_path}")}"
+				;;
 
-    case "${type}" in
-    /)
-        line="${line//${path}/$(str_color ${dir_color} "${short_path}")}"
-        ;;
-
-    link)
-        line="${line//${path}/$(str_color ${ln_color} "${short_path}")}"
-	line="${line//${BLIB_BIN}/}"
-	;;
-	
-    \*)
-        line="${line//${path}/$(str_color ${exe_color} "${short_path}")}"
-        opts=''
-        if ${verbose}; then
-            opts+="$( command_getopts ${path} )"
-            if ${mono}; then
-                line+="${opts}"
-            else
-                line+="$(str_color yellow "${opts}")"
-            fi
-        fi
-        ;;
-    esac
-    echo "${line}"
+			link)
+				line="${line//${path}/$(str_color ${ln_color} "${short_path}")}"
+			line="${line//${BLIB_BIN}/}"
+			;;
+			
+			\*)
+				line="${line//${path}/$(str_color ${exe_color} "${short_path}")}"
+				opts=''
+				if ${verbose}; then
+					opts+="$( command_getopts ${path} )"
+					if ${mono}; then
+						line+="${opts}"
+					else
+						line+="$(str_color yellow "${opts}")"
+					fi
+				fi
+				;;
+			esac
+			echo "${line}"
+		done
 done

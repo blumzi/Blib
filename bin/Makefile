@@ -7,5 +7,7 @@ BINS = btool \
 		object/show \
 		platform/dmi/show
 
+include ../distrib/${DISTRO}/macros.mk
+
 install:
-	$(foreach bin,${BINS},install -m 755 -D ${bin} ${DESTDIR}/bin/${bin};)
+	$(foreach bin,${BINS},install -m 755 -D ${bin} ${DESTDIR}/${BLIB_BASE}/bin/${bin};)

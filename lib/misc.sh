@@ -13,7 +13,10 @@ function misc_have_subcommand() {
     declare command="${*}"
 
     command="$( echo "${command}" | sed -e 's;[[:space:]];/;g' )"
-    [ -x ${BLIB_BIN}/${command} ] && return 0 || return 1
+	for dir in ${BLIB_PATH//:/ }; do
+			[ -x ${dir}/bin/${command} ] && return 0
+	done
+	return 1
 }
 
 function misc_stdin_is_pipe() {

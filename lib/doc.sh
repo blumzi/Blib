@@ -87,7 +87,7 @@ function _doc_parse_arg() {
 ##
 function doc_command() {
     local format=text
-    local opts=$( getopt -o '' --long "format:" -n "${FUNCNAME}" -- "$@" )
+    local opts=$( getopt -o '' --long "format:,man" -n "${FUNCNAME}" -- "$@" )
     local command
 
     eval set -- "${opts}"
@@ -98,8 +98,11 @@ function doc_command() {
             shift 2
             ;;
 
-        --)
+        -*)
             shift 1
+            ;;
+
+        *)
             break
             ;;
         esac

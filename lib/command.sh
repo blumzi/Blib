@@ -6,7 +6,9 @@ function command_getopts() {
     local file=${1}
     local opts
 
-    opts="$(grep BLIB_OPTS= ${file} | sed \
+    opts="$(grep BLIB_OPTS= ${file})"
+    if [ "${opts}" ]; then
+        opts="$(echo "${opts}" | sed \
             -e 's;.*--long.; ;' \
             -e 's;";;g' \
             -e "s;';;g" \
@@ -15,9 +17,10 @@ function command_getopts() {
             -e 's;,; ;g' \
             -e 's;^[[:space:]]*;;')"
 
-    if [ "${opts}" ]; then
-        opts="$(list_sort "${opts}")"
-        echo "  --${opts// /  --}"
+        if [ "${opts}" ]; then
+            opts="$(list_sort "${opts}")"
+            echo "  --${opts// /  --}"
+        fi
     fi
 }
 
