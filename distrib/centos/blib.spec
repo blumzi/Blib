@@ -18,7 +18,6 @@ A development framework for bash(1), providing:
  - well defined argument passing
  - definition of in-source documentation with man page generation
 
-
 %prep
 %setup -q
 
@@ -35,5 +34,8 @@ cd ${RPM_BUILD_ROOT}; find . -type f | sed -e "s;^.;;" -e 's;/usr/share/man/.*;&
 
 %clean
 rm /tmp/%{name}-%{version}.files
+
+%postun
+/bin/rm -rf @BLIB_BASE@
 
 %changelog
