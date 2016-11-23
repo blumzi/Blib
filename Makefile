@@ -21,6 +21,7 @@ tarball: install
 	install -m 644 -D distrib/${DISTRO}/macros.mk ${DESTDIR}/${BLIB_BASE}/distrib/${DISTRO}/macros.mk
 	install -m 644 -D README ${DESTDIR}/${BLIB_BASE}/README
 	cd ${DESTDIR}; sed -i -e "s;@BLIB_BASE@;${BLIB_BASE};g" $$(find -type f)
+	sed -i -e "s;@BLIB_BASE@;${BLIB_BASE};g" ${RPMBUILD}/SPECS/${PACKAGE}.spec
 	cd ${DESTDIR}/..; tar czf $(HOME)/rpmbuild/SOURCES/${PACKAGE}-${VERSION}.tgz ${PACKAGE}-${VERSION}
 	
 distrib: tarball
