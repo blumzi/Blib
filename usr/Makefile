@@ -1,7 +1,5 @@
-MANS = man1/bdoc.1 \
-		man1/btool.1 \
+MANS = man1/btool.1 \
 		man3/blib.3 \
-		man5/bdoc-guidelines.5 \
 		man5/blib-guidelines.5
 
 include ../distrib/${DISTRO}/macros.mk
