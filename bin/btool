@@ -55,16 +55,6 @@ function usage_btool() {
 	EOF
 }
 
-function usage_bdoc() {
-    cat <<- EOF
-
-    usage: ${prog} --help
-    usage: ${prog} [[sub] ... ] command
-    usage: ${prog} [--module=<module-name> [--function=<function-name>]]
-
-	EOF
-}
-
          argv=( "${@}" )
          argc=${#argv[*]}
         flags=()
