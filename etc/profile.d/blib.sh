@@ -1,11 +1,10 @@
 #!/bin/bash
 
 if [ ! "${BLIB_PATH}" ]; then
-    export BLIB_PATH=@BLIB_BASE@
+    export BLIB_PATH=/usr/share/blib
 fi
 
 export BLIB_COMMAND="btool"
-export    BLIB_BDOC="bdoc"
 
 for dir in ${BLIB_PATH//:/ }; do
     modfile=${dir}/lib/module.sh
@@ -37,17 +36,25 @@ function _blibtool() {
     local cmd=${cmdline[0]}
     local cur=${cmdline[COMP_CWORD]}
     local main_flags subpath fullpath options=() opt
+    local module func man_mode=false
 
     case ${COMP_WORDS[0]} in
-    ${BLIB_COMMAND}) main_flags="--debug --help"               ;;
-    ${BLIB_BDOC})    main_flags="--help --module= --function=" ;;
+    ${BLIB_COMMAND}) main_flags="--debug --man --module= --function=" ;;
     esac
 
-    for (( i = 1; i <  ${COMP_CWORD}; i++ )); do
+    for (( i = 1; i <=  ${COMP_CWORD}; i++ )); do
         if [[ ${cmdline[i]} == -* ]]; then
+            if [[ "${cmdline[i]}" == --man ]]; then
+                man_mode=true
+            elif [[ "${cmdline[i]}" == --module=* ]]; then
+                module="${cmdline[i]#--module=}"
+            elif [[ "${cmdline[i]}" == --function=* ]]; then
+                func="${cmdline[i]#--function=}"
+            fi
             continue
+        else
+            subpath+="${cmdline[i]}/"
         fi
-        subpath+="${cmdline[i]}/"
     done
     subpath=${subpath%/}
     fullpath=$(command_path_lookup ${subpath//\// })
@@ -88,4 +95,3 @@ function _blibtool() {
 }
 
 complete -o default -o nospace -F _blibtool ${BLIB_COMMAND} ${BLIB_COMMAND}
-complete -o default -o nospace -F _blibtool ${BLIB_BDOC}    ${BLIB_BDOC}
