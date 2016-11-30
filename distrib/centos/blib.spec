@@ -6,7 +6,7 @@ Summary:        A bash development framework
 License:        BSD2
 Source0:        %{name}-%{version}.tgz
 
-Requires:		bash   
+Requires:		bash xmlstarlet wget
 BuildArch:		noarch
 
 %description
