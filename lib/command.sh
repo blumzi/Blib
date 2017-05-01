@@ -2,6 +2,41 @@
 
 module_include list
 
+command_remote_host=
+command_remote_user=
+command_remote_identity=
+
+function command_remote_set() {
+    local opts=$( getopt -o '' --long "host:,user:,identity:" -n "${FUNCNAME}" -- "$@" )
+    local host=localhost user=${USER} command
+    local status identity
+
+    eval set -- "${opts}"
+    while true; do
+        case "${1}" in
+        --identity)
+            command_remote_identity="${2}"
+            shift 2
+            ;;
+
+        --host)
+            command_remote_host="${2}"
+            shift 2
+            ;;
+
+        --user)
+            command_remote_user="${2}"
+            shift 2
+            ;;
+
+        --)
+            shift 1
+            break
+            ;;
+        esac
+    done
+}
+
 function command_getopts() {
     local file=${1}
     local opts
@@ -68,6 +103,7 @@ function command_local() {
 ## @func    command_remote
 ## @flag    <host=(name|addr)> Host name or IP address (default: localhost)
 ## @flag    [user=user-name] The user to use (default: current user)
+## @flag    [identity=identity-file] The identity to use (default: no identity)
 ## @arg     <command+args> The command and its arguments
 ## @desc    Runs a command remotely via SSH
 ## @ret     exit status of the command
@@ -75,13 +111,18 @@ function command_local() {
 ## @end
 ##
 function command_remote() {
-    local opts=$( getopt -o '' --long "host:,user:" -n "${FUNCNAME}" -- "$@" )
+    local opts=$( getopt -o '' --long "host:,user:,identity:" -n "${FUNCNAME}" -- "$@" )
     local host=localhost user=${USER} command
-    local status
+    local status identity
 
     eval set -- "${opts}"
     while true; do
         case "${1}" in
+        --identity)
+            identity="${2}"
+            shift 2
+            ;;
+
         --host)
             host="${2}"
             shift 2
@@ -101,7 +142,19 @@ function command_remote() {
     command="${@}"
 
     # TBD: Send the BLIB_TRACE env. var.
-    ssh ${user}@${host} ${cmd}
+    if [ ! "${identity}" ] && [ "${command_remote_identity}" ]; then
+        identity="${command_remote_identity}"
+    fi
+
+    if [ ! "${user}" ] && [ "${command_remote_user}" ]; then
+        user="${command_remote_user}"
+    fi
+
+    if [ ! "${host}" ] && [ "${command_remote_host}" ]; then
+        host="${command_remote_host}"
+    fi
+
+    ssh ${identity:+-i ${identity}} ${user:+${user}@}${host} ${cmd}
     status=$?
 
     # log?
