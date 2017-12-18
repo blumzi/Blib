@@ -1,5 +1,3 @@
-#!/bin/bash
-
 _str_compactor_="@"
 
 function str_compact() {

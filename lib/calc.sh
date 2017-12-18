@@ -1,5 +1,3 @@
-#!/bin/bash
-
 module_include error const
 
 function calc_percent() {

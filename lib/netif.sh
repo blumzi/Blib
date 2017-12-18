@@ -1,5 +1,3 @@
-#!/bin/bash
-
 module_include ip oem log error const misc platform
 
 function netif_info() {

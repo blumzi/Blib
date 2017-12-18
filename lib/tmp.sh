@@ -1,5 +1,3 @@
-#!/bin/bash
-
 
 function tmp_mkfile() {
     declare prefix=${1}

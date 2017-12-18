@@ -1,5 +1,3 @@
-#!/bin/bash
-
 if ! typeset -F __module_marker__ > /dev/null; then
 
     function __module_marker__() {

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 ##
 ## @module  conf
 ## @desc    Handles variable=value type lines in bash configuration files.

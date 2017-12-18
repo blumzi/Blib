@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #
 # Dummy function, for tags(1)
 #

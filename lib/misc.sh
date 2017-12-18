@@ -1,5 +1,3 @@
-#!/bin/bash
-
 function misc_password() {
     declare prompt="${1}"
     declare pass

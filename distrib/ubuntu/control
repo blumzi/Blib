@@ -1,0 +1,16 @@
+Priority: optional
+Standards-Version: 3.9.2
+Architecture: all
+Package: blib
+Version: 1.0
+Maintainer: Arie Blumenzweig <theblumz@gmail.com>
+Section: shells
+Depends: wget,xmlstarlet
+Description: Facilitates re-usable code writing in bash(1)
+ Blib is a script development framework for bash(1), providing:
+  - definition, lookup and inclusion of modules
+  - a structured tree for sub-commands
+  - debugging and tracing
+  - well defined argument passing
+  - definition of in-source documentation with man page generation
+

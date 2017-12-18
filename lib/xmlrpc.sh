@@ -1,5 +1,3 @@
-#!/bin/bash
-
 module_include xml tmp
 
 __xmlrpc_responder__=${BLIB_COMMAND}

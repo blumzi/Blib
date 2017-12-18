@@ -1,0 +1,5 @@
+blib (1.0-1)
+
+  * Made Debian package lintian clean.
+
+ -- Arie Blumenzweg <theblumz@gmail.com> 2017-12-18

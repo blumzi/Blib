@@ -1,5 +1,3 @@
-#!/bin/bash
-
 ##
 ## @module  list
 ## @desc    Handles various list operations.  The lists are actually

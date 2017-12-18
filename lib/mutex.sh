@@ -1,5 +1,3 @@
-#!/bin/bash
-
 module_include flock const list str error
 
 #

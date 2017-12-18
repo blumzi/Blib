@@ -10,4 +10,7 @@ BINS = btool \
 include ../distrib/${DISTRO}/macros.mk
 
 install:
-	$(foreach bin,${BINS},install -m 755 -D ${bin} ${DESTDIR}/${BLIB_BASE}/bin/${bin};)
+ifeq ($(STAGING_AREA),)
+	$(error Missing STAGING_AREA)
+endif
+	$(foreach bin,${BINS},install -m 755 -D ${bin} $(STAGING_AREA)/usr/share/$(PACKAGE_NAME)/bin/${bin};)

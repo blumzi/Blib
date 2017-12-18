@@ -1,5 +1,3 @@
-#!/bin/bash
-
 module_include misc
 
 function http_get() {

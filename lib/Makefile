@@ -5,6 +5,9 @@ MODULES = calc.sh command.sh conf.sh const.sh dmi.sh doc.sh error.sh flock.sh ht
 include ../distrib/${DISTRO}/macros.mk
 
 install:
-	$(foreach module,$(MODULES),install -m 644 -D ${module} ${DESTDIR}/${BLIB_BASE}/lib/${module};)
+ifeq ($(STAGING_AREA),)
+	$(error Missing STAGING_AREA))
+endif
+	$(foreach module,$(MODULES),install -m 644 -D ${module} $(STAGING_AREA)/usr/share/$(PACKAGE_NAME)/lib/${module};)
 
 .PHONY: install

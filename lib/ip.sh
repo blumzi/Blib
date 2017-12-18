@@ -1,5 +1,3 @@
-#!/bin/bash
-
 module_include const str
 
 function ip_is_quad() {

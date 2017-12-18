@@ -1,5 +1,3 @@
-#!/bin/bash
-
 function _flock_common_() {
     declare timeout="--timeout 10"
     declare non_block file exclusive command

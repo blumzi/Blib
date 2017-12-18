@@ -1,5 +1,3 @@
-#!/bin/bash 
-
 
 _tap_version='1.02'
 	

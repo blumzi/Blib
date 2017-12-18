@@ -1,5 +1,3 @@
-#!/bin/bash
-
 module_include list
 
 command_remote_host=

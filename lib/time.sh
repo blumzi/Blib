@@ -1,5 +1,3 @@
-#!/bin/bash
-
 function time_now_seconds() {
     date +%s
 }

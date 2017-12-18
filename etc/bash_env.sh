@@ -18,6 +18,6 @@ if [ "${BASH_ENV}" ]; then
 fi
 
 if [ "${BLIB_DEBUG}" ]; then
-    export PS4='+ \d \t ${FUNCNAME:-main}@${BASH_SOURCE}:${LINENO} '
+    export PS4='+ \d \t ${FUNCNAME:-main}@/${BASH_SOURCE}:${LINENO} '
     set -x
 fi

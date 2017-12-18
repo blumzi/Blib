@@ -1,5 +1,3 @@
-#!/bin/bash
-
 module_include log const xml time
 
 #

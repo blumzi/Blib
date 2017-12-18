@@ -1,5 +1,3 @@
-#!/bin/bash
-
 module_include xml const misc list flock str tmp trace
 
 function log_file_path() {

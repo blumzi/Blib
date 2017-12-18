@@ -1,5 +1,3 @@
-#!/bin/bash
-
 module_include error str user
 
 function dmi_get() {
