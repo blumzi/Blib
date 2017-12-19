@@ -2,28 +2,23 @@
 -include run.mk
 -include ../macros.mk
 
-version := 1.0
-arch    := all
-package := blib_${version}_${arch}.deb
+version  := 1.0
+arch     := all
+package  := blib_${version}_${arch}.deb
+controls := control postinst prerm conffiles
 
-controls := control postinst prerm
+STAGING_AREA=$(TOP)/staging-area/$(DISTRO)/$(PACKAGE_NAME)
 
-${package}: ${controls}
-	@$(call run,deb,$@,$$(call make-deb-from-tgz,${controls},${@},$(TARBALL)))
+pack:
+	mkdir -p $(STAGING_AREA)/DEBIAN
+	$(foreach d,bin lib etc usr,$(MAKE) -C $(TOP)/$(d) STAGING_AREA=$(STAGING_AREA) install; )
+	install -m 644 -D control $(STAGING_AREA)/DEBIAN/control
+	install -m 755 -D postinst $(STAGING_AREA)/DEBIAN/postinst
+	install -m 755 -D prerm $(STAGING_AREA)/DEBIAN/prerm
+	cd $(STAGING_AREA)/..; fakeroot dpkg-deb --build $(PACKAGE_NAME) $(package) ; lintian --no-tag-display-limit $(package)
+	@echo "\n $(DISTRO) package ready in $(dir $(STAGING_AREA))$(package)\n"
 
 clean:
-	@$(call run,deb-clean,${package},rm -f ${package})
+	rm -rf $(STAGING_AREA)
 
-install: ${package}
-	@$(call run,deb-install,${package} -> ${INSTALL-DIR},install -D -m 644 ${package} ${INSTALL-DIR}/${package})
-
-distrib: STAGING_AREA=$(TOP)/staging-area/$(DISTRO)/$(PACKAGE_NAME)
-distrib:
-	mkdir -p $(STAGING_AREA)/DEBIAN
-	$(foreach dir,bin lib usr,$(MAKE) -C $(TOP)/$(dir) STAGING_AREA=$(STAGING_AREA) install; )
-	install -m 644 -D control $(STAGING_AREA)/DEBIAN/control
-	install -m 755 postinst $(STAGING_AREA)/DEBIAN/postinst
-	install -m 755 prerm $(STAGING_AREA)/DEBIAN/prerm
-	cd $(STAGING_AREA)/..; fakeroot dpkg-deb --build $(PACKAGE_NAME) ; lintian --no-tag-display-limit $(PACKAGE_NAME).deb
-
-.PHONY: clean install distrib
+.PHONY: distrib

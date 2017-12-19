@@ -1,6 +1,5 @@
 MANS = man1/btool.1 \
-		man3/blib.3 \
-		man5/blib-guidelines.5
+		man3/blib.3
 
 DOCS = copyright changelog
 

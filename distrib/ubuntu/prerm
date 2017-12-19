@@ -2,4 +2,4 @@
 
 set -e
 
-rm -f /etc/profile.d/blib.sh
+rm -f /etc/profile.d/blib.sh /etc/bash_env.sh

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #
 # When the environment variable BASH_ENV points to this file, each and every
 #  bash script will run it as soon as it starts, see man bash(1).
