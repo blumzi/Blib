@@ -40,8 +40,10 @@ function _blibcomplete() {
     ${BLIB_COMMAND}) main_flags="--debug --man --module= --function=" ;;
     esac
 
+    local found_subcommand_flags=false
     for (( i = 1; i <=  ${COMP_CWORD}; i++ )); do
         if [[ ${cmdline[i]} == -* ]]; then
+            found_subcommand_flags=true
             if [[ "${cmdline[i]}" == --man ]]; then
                 man_mode=true
             elif [[ "${cmdline[i]}" == --module=* ]]; then
@@ -51,7 +53,9 @@ function _blibcomplete() {
             fi
             continue
         else
-            subpath+="${cmdline[i]}/"
+            if ! ${found_subcommand_flags}; then
+                subpath+="${cmdline[i]}/"
+            fi
         fi
     done
     subpath=${subpath%/}
@@ -68,38 +72,36 @@ function _blibcomplete() {
             options=( ${main_flags} )
         fi
     elif [ ! "${command_fullpath}" ]; then
-	# What we got up till now is not the full name of a blib subcommand
-	# We'll suggest all the blib subcommands that start with this prefix
-    	local path_element
-	local d
-	options=()
-	for path_element in ${BLIB_PATH//:/ }; do
-		local save_shopt=$(shopt -p nullglob)
-		shopt -s nullglob
-		for d in $(dirname ${path_element}/bin/${subpath}); do
-			if [ -d ${d} ]; then
-				options+=( $(cd ${d}; echo $(basename ${subpath})* ) )
-			fi
-		done
-		${save_shopt}
-	done
-	COMPREPLY=( $(compgen -W "${options[*]}" -- $cur ) )
-	return 
-#      elif [ -d ${command_fullpath} ]; then         # up till now we have only directories
-#            for name in $( cd ${command_fullpath}; echo *); do
-#                if [ ${name} = ${BLIB_COMMAND} ]; then
-#                    continue
-#                fi
-#                if [ -d ${command_fullpath}/${name} ] || [ -x ${command_fullpath}/${name} ]; then
-#                    if [ "${cur}" ]; then   # we have a start of a word
-#                        if [[ "${name}" == ${cur}* ]]; then
-#                            options+=( ${name} )
-#                        fi
-#                    else
-#                        options+=( ${name} )
-#                    fi
-#                fi
-#            done
+        # What we got up till now is not the full name of a blib subcommand
+        # We'll suggest all the blib subcommands that start with this prefix
+        local path_element
+        local d
+        options=()
+        for path_element in ${BLIB_PATH//:/ }; do
+            local save_shopt=$(shopt -p nullglob)
+            shopt -s nullglob
+            for d in $(dirname ${path_element}/bin/${subpath}); do
+                if [ -d ${d} ]; then
+                    options+=( $(cd ${d}; echo $(basename ${subpath})* ) )
+                fi
+            done
+            ${save_shopt}
+        done
+    elif [ -d ${command_fullpath} ]; then         # up till now we have only directories
+        for name in $( cd ${command_fullpath}; echo *); do
+            if [ ${name} = ${BLIB_COMMAND} ]; then
+                continue
+            fi
+            if [ -d ${command_fullpath}/${name} ] || [ -x ${command_fullpath}/${name} ]; then
+                if [ "${cur}" ]; then   # we have a start of a word
+                    if [[ "${name}" == ${cur}* ]]; then
+                        options+=( ${name} )
+                    fi
+                else
+                    options+=( ${name} )
+                fi
+            fi
+        done
     fi
     COMPREPLY=( $(compgen -W "${options[*]}" -- $cur ) )
 }

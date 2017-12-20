@@ -39,6 +39,9 @@ function command_getopts() {
     local file=${1}
     local opts
 
+    if [ ! "${file}" ]; then
+        return
+    fi
     opts="$(grep BLIB_OPTS= ${file})"
     if [ "${opts}" ]; then
         opts="$(echo "${opts}" | sed \
