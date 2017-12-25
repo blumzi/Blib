@@ -6,6 +6,7 @@
 ## @desc    
 ## @desc    Make sure you quote the lists passed as arguments.
 ## @desc    Elements should not contain spaces!
+## @author  Arie Blumenzweig <theblumz@gmail.com>
 ##
 
 ##

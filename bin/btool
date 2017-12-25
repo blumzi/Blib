@@ -49,6 +49,7 @@ function usage_btool() {
     <global-flags>:
         --debug:    run the sub-command in debug mode
         --man:      show man page for the command or module (with --module=module [--function=function ])
+        --format:   documentation output format (known formats: text, md)
 
     Runs the sub-command with flags and arguments.
 
@@ -66,12 +67,25 @@ for (( i = 0; i < ${argc}; i++ )); do
     [[ "${argv[i]}" != -* ]] && break || flags+=("${argv[i]}")
 done
 
-debug=false
- help=false
-  sub=false
-  man=false
+ debug=false
+  help=false
+   sub=false
+   man=false
+format=text
 
-BLIB_OPTS=$( getopt -o 'dhm:f:' --long "man,debug,help,module:,function:" -n "${prog}" -- "${flags[@]}" )
+function known_format() {
+    local format="${1}"
+    local known_formats=( text md )
+
+    for f in ${known_formats[*]}; do
+        if [ ${format} = ${f} ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+BLIB_OPTS=$( getopt -o 'dhm:f:' --long "man,debug,help,module:,function:,format:" -n "${prog}" -- "${flags[@]}" )
 eval set -- "${BLIB_OPTS}"
 unset BLIB_OPTS
 
@@ -103,6 +117,16 @@ while true; do
         shift 1
         ;;
 
+    --format)
+        if known_format "${2}"; then
+            format="${2}"
+            shift 2
+        else
+            eval usage_${prog}
+            exit 1
+        fi
+        ;;
+
     --)
         shift
         break
@@ -119,9 +143,9 @@ if ${man}; then
             args+=" --function=${func}"
         fi
 
-        doc_module ${args}
+        doc_module --format=${format} ${args}
     else
-        doc_command ${argv[@]}
+        doc_command --format=${format} ${argv[@]}
     fi
     exit 0
 fi

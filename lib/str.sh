@@ -132,15 +132,15 @@ function str_unpack() {
 function str_escape() {
     local str="${1}"
 
-    echo -n "${str}" | tr   "${const_space}${const_tab}${const_quote}${const_bquote}${const_dquote}${const_newline}${const_dollar}${const_lpar}${const_rpar}${const_lbrkt}${const_rbrkt}" \
-                "${const_escaped_space}${const_escaped_tab}${const_escaped_quote}${const_escaped_bquote}${const_escaped_dquote}${const_escaped_newline}${const_escaped_dollar}${const_escaped_lpar}${const_escaped_rpar}${const_escaped_lbrkt}${const_escaped_rbrkt}"
+    echo -n "${str}" | tr   "${const_space}${const_tab}${const_quote}${const_bquote}${const_dquote}${const_newline}${const_dollar}${const_lpar}${const_rpar}${const_lbrkt}${const_rbrkt}${const_lsharp}${const_rsharp}" \
+                "${const_escaped_space}${const_escaped_tab}${const_escaped_quote}${const_escaped_bquote}${const_escaped_dquote}${const_escaped_newline}${const_escaped_dollar}${const_escaped_lpar}${const_escaped_rpar}${const_escaped_lbrkt}${const_escaped_rbrkt}${const_escaped_lsharp}${const_escaped_rsharp}"
 }
 
 function str_unescape() {
     local str="${1}"
 
-    echo -n "${str}" | tr   "${const_escaped_space}${const_escaped_tab}${const_escaped_quote}${const_escaped_dquote}${const_escaped_bquote}${const_escaped_newline}${const_escaped_dollar}${const_escaped_lpar}${const_escaped_rpar}${const_escaped_lbrkt}${const_escaped_rbrkt}" \
-                "${const_space}${const_tab}${const_quote}${const_dquote}${const_bquote}${const_newline}${const_dollar}${const_lpar}${const_rpar}${const_lbrkt}${const_rbrkt}"
+    echo -n "${str}" | tr   "${const_escaped_space}${const_escaped_tab}${const_escaped_quote}${const_escaped_dquote}${const_escaped_bquote}${const_escaped_newline}${const_escaped_dollar}${const_escaped_lpar}${const_escaped_rpar}${const_escaped_lbrkt}${const_escaped_rbrkt}${const_escaped_lsharp}${const_escaped_rsharp}" \
+                "${const_space}${const_tab}${const_quote}${const_dquote}${const_bquote}${const_newline}${const_dollar}${const_lpar}${const_rpar}${const_lbrkt}${const_rbrkt}${const_lsharp}${const_rsharp}"
 }
 
 function str_hex_dump() {

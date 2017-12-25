@@ -312,7 +312,7 @@ function doc_module() {
 
     done < ${module_file}
 
-    module_include doc/doctext
+    module_include doc/doc${format}
 
     # show the module info
     for attr in name file version author summary description; do
