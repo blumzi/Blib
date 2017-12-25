@@ -187,6 +187,14 @@ function doc_command() {
     doc+="$( eval ${doc_render_exits}       "${exits[@]}"   )"
 
     doc="$(str_unescape "${doc}")"
+    if [ "${format}" = md ] && command -v pandoc >&- && command -v lynx >&-; then
+        local tmp=$(mktemp /tmp/docXXXXXXXX.html)
+        echo -e "${doc}" | pandoc -s -f markdown > ${tmp}
+        lynx ${tmp}
+        /bin/rm ${tmp}
+        exit 0
+    fi
+
     [ "${PAGER}" ] && \
         echo -e "${doc}" | ${PAGER} || \
         echo -e "${doc}"
@@ -354,6 +362,14 @@ function doc_module() {
     fi
 
     doc="$(str_unescape "${doc}")"
+    if [ "${format}" = md ] && command -v pandoc >&- && command -v lynx >&-; then
+        local tmp=$(mktemp /tmp/docXXXXXXXX.html)
+        echo -e "${doc}" | pandoc -s -f markdown > ${tmp}
+        lynx ${tmp}
+        /bin/rm ${tmp}
+        exit 0
+    fi
+
     [ "${PAGER}" ] && \
         echo -e "${doc}" | ${PAGER} || \
         echo -e "${doc}"

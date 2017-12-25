@@ -6,7 +6,6 @@ function _docmd_escape_brackets() {
     local str="${@}"
 
     str="${str//[<>]/_}"
-    echo "$(str_unescape "${str}")" >&2
     echo "${str}"
 }
 
