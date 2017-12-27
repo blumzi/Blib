@@ -72,6 +72,9 @@ done
    sub=false
    man=false
 format=text
+if type -t pandoc >- && type -t lynx >-; then
+    format=md
+fi
 
 function known_format() {
     local format="${1}"
