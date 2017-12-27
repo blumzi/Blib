@@ -149,7 +149,7 @@ if ! typeset -F __module_marker__ > /dev/null; then
             str=''
             ${show_paths} && str+="\n"
             str+="$( printf "%-10s" "${module}" )"
-            ${show_paths} && str+="$( printf "[%s] " "${file/${HOME}/~}" )"
+            ${show_paths} && str+="$( printf "[%s] " "${file/${HOME}/\~}" )"
             echo -e "${str}"
             if ${show_functions}; then
                 for func in $(module_functions ${module} ); do
@@ -184,7 +184,7 @@ if ! typeset -F __module_marker__ > /dev/null; then
                     continue
                 fi
                 seen="$(list_append ${module} "${seen}")"
-                _module_show_ ${module} ${file}
+                _module_show_ ${module} $(realpath ${dir}/lib/${file} 2>/dev/null)
             done
         done
     }
