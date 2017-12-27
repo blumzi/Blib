@@ -190,6 +190,7 @@ fi
 for dir in ${BLIB_PATH//:/ }; do
     if [ -x ${dir}/bin/${BLIB_SUBCOMMAND_PATH} ]; then
         executable=${dir}/bin/${BLIB_SUBCOMMAND_PATH}
+        break
     fi
 done
 

@@ -87,7 +87,7 @@ else
     else
         dir_color=blue
         exe_color=green
-	 ln_color=cyan
+         ln_color=cyan
     fi
 fi
 
@@ -103,6 +103,10 @@ for top in ${tops[@]}; do
 				type="link"
 			else
 				type=${line:${#line}-1:${#line}}
+                #echo "type=${type}" >&2
+                if [ "${type}" != '*' ] && [ "${type}" != '/' ]; then
+                    continue
+                fi
 			fi
 			if [ "${line}" != "${top}" ]; then
 				line="${line:0:${#line}-1}"     # discard type
@@ -124,8 +128,8 @@ for top in ${tops[@]}; do
 
 			link)
 				line="${line//${path}/$(str_color ${ln_color} "${short_path}")}"
-			line="${line//${BLIB_BIN}/}"
-			;;
+                line="${line//${BLIB_BIN}/}"
+                ;;
 			
 			\*)
 				line="${line//${path}/$(str_color ${exe_color} "${short_path}")}"
