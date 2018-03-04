@@ -1,3 +1,4 @@
+module_include cleanup
 
 function tmp_mkfile() {
     declare prefix=${1}
@@ -17,3 +18,6 @@ function tmp_cleanup() {
     fi
 }
 
+function tmp_init() {
+    cleanup_register tmp_cleanup
+}
