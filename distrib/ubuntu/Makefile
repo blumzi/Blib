@@ -21,4 +21,4 @@ pack:
 clean:
 	rm -rf $(STAGING_AREA)
 
-.PHONY: distrib
+.PHONY: pack clean
