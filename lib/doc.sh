@@ -64,7 +64,7 @@ function _doc_parse_arg() {
     local mand_arg_pattern="<([^>]*)>"
     local  opt_arg_pattern="\[([^]]*)\]"
 
-    arg_type=''
+    arg_type=mandatory
     if [[ "${input}" =~ ${mand_arg_pattern}* ]]; then
          arg_type=mandatory
     elif [[ "${input}" =~ ${opt_arg_pattern}* ]]; then

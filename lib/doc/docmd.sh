@@ -1,6 +1,6 @@
 module_include str
 
-_docmd_line_break="  \n"
+_docmd_line_break="<br>\n"
 
 function _docmd_escape_brackets() {
     local str="${@}"
@@ -25,7 +25,7 @@ function _docmd_escape_sharps() {
 ##
 function _docmd_indent() {
     local -i level=${1}
-    local indent="   " i str
+    local indent="&nbsp;&nbsp;&nbsp;&nbsp;" i str
 
     for (( i = 0; i < level; i++ )); do
         str+="${indent}"
@@ -46,8 +46,7 @@ function docmd_format_command() {
     local str
 
      str="$(_docmd_section command)"
-    str+="$(_docmd_indent 1)${BLIB_COMMAND} ${command}"
-    str+="\n"
+    str+="$(_docmd_indent 1)${BLIB_COMMAND} ${command}${_docmd_line_break}"
 
     echo "${str}"
 }
@@ -57,8 +56,7 @@ function docmd_format_file() {
     local str
 
      str="$(_docmd_section file)"
-    str+="$(_docmd_indent 1)${file}"
-    str+="\n"
+    str+="$(_docmd_indent 1)${file}${_docmd_line_break}"
 
     echo "${str}"
 }
@@ -75,7 +73,7 @@ function docmd_format_authors() {
         str+="${author}, "
     done
     str="${str%, }"
-    str+="\n"
+    str+="${_docmd_line_break}"
 
     echo "${str}"
 }
@@ -89,6 +87,7 @@ function docmd_format_description() {
     str="$(_docmd_section description)"
     for desc in ${descs[@]}; do
         if [ "${desc}" = "${const_escaped_newline}" ]; then
+            str+="<br>"
             continue
         fi
         spaces="${desc%%[^${const_escaped_space}]*}"
@@ -98,8 +97,8 @@ function docmd_format_description() {
     done
 
     for desc in ${descs[@]}; do
-        line="$(_docmd_indent 1)${desc}\n"
-        str+="${line:${min}}"
+        line="$(_docmd_indent 1)${desc}"
+        str+="${line:${min}}<br>"
     done
 
     echo "${str}"
@@ -133,40 +132,33 @@ function docmd_format_full_flag() {
     case ${context} in
     function)
          str="$(_docmd_indent 2)"
-        str+='**flag**'
-        #str+="--$(str_color --underline white "${flag_name}")"
-        str+="--_${flag_name}_"
+        str+='*flag*'
+        str+=" --_${flag_name}_"
         if [ "${flag_val}" ]; then
-            str+="="
-            #str+="$(str_color --bold white "${flag_val}")"
-            str+="**${flag_val}**"
+            str+="=_${flag_val}_"
         fi
         str+=" "
         if [ ${flag_type} = optional ]; then
             str+=" [opt] "
         fi
-        str+="$(str_decode ${flag_desc})"
-        str+="\n"
+        str+="$(str_unescape ${flag_desc})"
         ;;
 
     tool)
          str="$(_docmd_indent 1)"
-        #str+="--$(str_color --underline white "${flag_name}")"
-        str+="_${flag_name}_"
+        str+=" _${flag_name}_"
         if [ "${flag_val}" ]; then
-            str+="="
-            #str+="$(str_color --bold white "${flag_val}")"
-            str+="**${flag_val}**"
+            str+="=_${flag_val}_"
         fi
         str+=" "
         if [ ${flag_type} = optional ]; then
             str+=" [opt] "
         fi
-        str+="$(str_decode ${flag_desc})"
+        str+="$(str_unescape ${flag_desc})"
         ;;
     esac
 
-    echo "${str}"
+    echo "${str}${_docmd_line_break}"
 }
 
 ##
@@ -196,26 +188,25 @@ function docmd_format_full_arg() {
     case ${context} in
     function)
          str="$(_docmd_indent 2)"
-        str+="**arg** _${arg_name}_    "
+        str+="*arg* _${arg_name}_    "
         if [ ${arg_type} = optional ]; then
             str+=" [opt] "
         fi
-        str+="$(str_decode "${arg_desc}")${_docmd_line_break}"
+        str+="$(str_unescape "${arg_desc}")"
         ;;
 
     tool)
          str="$(_docmd_indent 1)"
-        str+="_${arg_name}_"
+        str+=" _${arg_name}_"
         str+="   "
         if [ ${arg_type} = optional ]; then
             str+=" [opt] "
         fi
-        str+="${arg_desc}"
-        str+="\n"
+        str+="$(str_unescape ${arg_desc})"
         ;;
     esac
 
-    echo "${str}"
+    echo "${str}${_docmd_line_break}"
 }
 
 function docmd_format_flags() {
@@ -226,7 +217,7 @@ function docmd_format_flags() {
 
     str="$(_docmd_section flags)"
     for flag in ${flags[@]}; do
-        str+="$(docmd_format_full_flag tool "${flag}")\n"
+        str+="$(docmd_format_full_flag tool "${flag}")"
     done
 
     echo "${str}"
@@ -241,8 +232,8 @@ function docmd_format_args() {
     fi
 
     str="$(_docmd_section args)"
-    for flag in ${flags[@]}; do
-        str+="$(_docmd_full_arg_description tool "${flag}")\n"
+    for arg in ${args[@]}; do
+        str+="$(_docmd_full_arg_description tool "${arg}")"
     done
 
     echo "${str}"
@@ -397,10 +388,11 @@ function docmd_format_module_function() {
     fi
     str+=${_docmd_line_break}
     # end of syntax line
+    #str+="\n<p>\n"
 
     if [ "${flags}" ]; then
         for _flag in ${flags}; do
-            str+="$( docmd_format_full_flag function "${_flag}" )${_docmd_line_break}"
+            str+="$( docmd_format_full_flag function "${_flag}" )"
         done
     fi
 
@@ -412,20 +404,19 @@ function docmd_format_module_function() {
 
     if [ "${stdout}" ]; then
         for _out in ${stdout}; do
-            str+="$(_docmd_indent 2)**out**   ${_out}${_docmd_line_break}"
+            str+="$(_docmd_indent 2)*out*   ${_out}"
         done
     fi
 
     if [ "${summary}" ]; then
         str+="$(_docmd_indent 2)${summary}"
-        set +x
     fi
 
     if [ "${description}" ]; then
         description="${description//${const_escaped_lsharp}/_}"
         description="${description//${const_escaped_rsharp}/_}"
         while [ "${description}" ]; do
-            str+="$(_docmd_indent 2)${description%%\\n*}\n"
+            str+="$(_docmd_indent 2)${description%%\\n*}<br>"
             if [[ "${description}" == *\n* ]]; then
                 description="${description#*\\n}"
             else
@@ -434,7 +425,8 @@ function docmd_format_module_function() {
         done
     fi
 
-    echo "${str}"
+    #str+="\n</p>\n"
+    echo "${str}${_docmd_line_break}"
 }
 
 function docmd_init() {
