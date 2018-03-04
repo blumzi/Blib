@@ -5,7 +5,8 @@ BINS = btool \
 		object/configure \
 		object/delete \
 		object/show \
-		platform/dmi/show
+		platform/dmi/show \
+		aws/ec2/set-host-name
 
 include ../distrib/${DISTRO}/macros.mk
 
