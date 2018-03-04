@@ -7,7 +7,7 @@ License:        BSD
 Source0:        
 
 BuildRequires:  
-Requires:       
+Requires:       xmlstarlet,jq
 
 %description
 A development framework for bash(1).
