@@ -1,0 +1,14 @@
+#!/bin/bash
+
+source /etc/profile.d/blib.sh
+
+module_include aws/ec2
+module_include log
+
+if [[ "$(hostname)" == ip-* ]]; then
+    hostname=$(ec2_get_public_hostname)
+    hostnamectl set-hostname ${hostname}
+    log_msg --syslog "set hostname to: \"${hostname}\"."
+fi
+
+exit 0
