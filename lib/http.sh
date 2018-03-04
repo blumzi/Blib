@@ -1,5 +1,20 @@
 module_include misc
 
+##
+## @module  http
+## @desc
+## @desc    Performs http actions, using wget(1).
+## @desc
+## @author  Arie Blumenzweig <theblumz@gmail.com>
+##
+
+##
+## @func http_get
+## @flag [timeout=seconds] Total timeout
+## @arg  url
+## @desc Performs a wget for the specified URL.
+## @out  The resulting contents.
+##
 function http_get() {
     declare url args timeout=5
     declare opts=$( getopt -o 't:' --long timeout: -n "${prog}" -- "$@" )
