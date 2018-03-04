@@ -38,7 +38,18 @@ if ! typeset -f module_include >/dev/null; then
     exit 1
 fi
 
-module_include error
+function on_error()
+{
+    local line file func
+
+    read line func file < <(caller 0)
+	echo "Error in \"${func}\" at ${file}:${line}" >&2
+}
+
+module_include error cleanup
+
+trap "cleanup_run" EXIT
+trap "on_error" ERR
 
 function usage_btool() {
     cat <<- EOF
