@@ -5,7 +5,7 @@ Package: blib
 Version: 1.0
 Maintainer: Arie Blumenzweig <theblumz@gmail.com>
 Section: shells
-Depends: wget,xmlstarlet,pandoc
+Depends: wget,xmlstarlet,pandoc,jq
 Description: Facilitates re-usable code writing in bash(1)
  Blib is a script development framework for bash(1), providing:
   - definition, lookup and inclusion of modules

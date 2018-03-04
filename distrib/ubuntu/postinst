@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 ln -sf /usr/share/blib/etc/profile.d/blib.sh /etc/profile.d/blib.sh
 ln -sf /usr/share/blib/etc/bash_env.sh /etc/bash_env.sh
